@@ -1,8 +1,8 @@
 # CSC322A1
 Gareth Marriott (V00875748),
 Oliver Diaz (V00967008),
-name (v-num),
-name (v-num)
+Sree Vyshnavi Tejovath (V00970746),
+Sadhik Ahamed Shaik Mohammed ()
 
 # USAGE:
 
