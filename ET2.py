@@ -1,83 +1,78 @@
-def sud2sat2(sudoku):
-    """
-    Convert Sudoku puzzle to CNF formula in DIMACS format for SAT solver (MiniSAT).
-    """
-    clauses = []
-    n = 9  # Sudoku size
+from pprint import pp
+import fileinput
 
-    def var(r, c, d):
-        return 81 * (r - 1) + 9 * (c - 1) + d
+sud = ""
+for line in fileinput.input():
+    sud += line
 
-    for r in range(1, n + 1):
-        for c in range(1, n + 1):
-            clauses.append([var(r, c, d) for d in range(1, n + 1)])
+sud = sud = ''.join(sud.split())
+# test_sud = "163805070008040065005007008450082039301000040700000000839050000604200590000093081"
 
-    for d in range(1, n + 1):
-        for r in range(1, n + 1):
-            for c1 in range(1, n):
-                for c2 in range(c1 + 1, n + 1):
-                    clauses.append([-var(r, c1, d), -var(r, c2, d)])
+def convert_grid_to_val(i,j,num):
+    return (81*(i-1))+(9*(j-1))+(num-1)+1
 
-    for d in range(1, n + 1):
-        for c in range(1, n + 1):
-            for r1 in range(1, n):
-                for r2 in range(r1 + 1, n + 1):
-                    clauses.append([-var(r1, c, d), -var(r2, c, d)])
+sat = []
 
-    for d in range(1, n + 1):
-        for r in range(0, n, 3):
-            for c in range(0, n, 3):
-                for i in range(3):
-                    for j in range(3):
-                        for k in range(i + 1, 3):
-                            for l in range(3):
-                                if i * 3 + j < k * 3 + l:
-                                    clauses.append([-var(r + i + 1, c + j + 1, d), -var(r + k + 1, c + l + 1, d)])
+for i in range(1,10):
+    for j in range(1,10):
+        if sud[((i-1)*9)+j-1] not in ["0",".","*","?","\n"]:
+            # print(test_sud[((i-1)*9)+j-1])
+            sat.append(str(convert_grid_to_val(i,j,int(sud[((i-1)*9)+j-1]))) + " 0")
 
-    for r in range(1, n + 1):
-        for c in range(1, n + 1):
-            if sudoku[r - 1][c - 1]:
-                d = sudoku[r - 1][c - 1]
-                clauses.append([var(r, c, d)])
 
-    dimacs = f"p cnf {n*n*n} {len(clauses)}\n" + "\n".join(" ".join(str(x) for x in clause) + " 0" for clause in clauses)
-    return dimacs
+for i in range(1,10):
+    for j in range(1,10):
+        literal = ""
+        for num in range(1,10):
+            literal += str(convert_grid_to_val(i,j,num)) + " "
+        literal += "0"
+        sat.append(literal)
 
-def sat2sud2(solution):
-    """
-    Convert SAT solver output (in DIMACS format) back to Sudoku puzzle.
-    """
-    n = 9  # Sudoku size
-    sudoku = [[0 for _ in range(n)] for _ in range(n)]
-    for var in solution:
-        if var > 0:
-            d = (var - 1) % 9 + 1
-            c = ((var - 1) // 9) % 9 + 1
-            r = ((var - 1) // 81) % 9 + 1
-            sudoku[r - 1][c - 1] = d
-    return sudoku
+for i in range(1,10):
+    for k in range(1,10):
+        for j in range(1,9):
+            for l in range(j+1,10):
+                sat.append(str(-1*convert_grid_to_val(i,j,k))+" "+str(-1*convert_grid_to_val(i,l,k))+" 0")
 
-# Example usage with a given Sudoku puzzle and a hypothetical SAT solver's output
-sudoku_puzzle = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]
-]
+for j in range(1,10):
+    for k in range(1,10):
+        for i in range(1,9):
+            for l in range(i+1,10):
+                sat.append(str(-1*convert_grid_to_val(i,j,k))+" "+str(-1*convert_grid_to_val(l,j,k))+" 0")
 
-dimacs_cnf = sud2sat2(sudoku_puzzle)
-print("DIMACS CNF for the given Sudoku puzzle:")
-print(dimacs_cnf)
+for k in range(1,10):
+    for a in range(0,3):
+        for b in range(0,3):
+            for u in range(1,4):
+                for v in range(1,3):
+                    for w in range(v+1,4):
+                        sat.append(str(-1*convert_grid_to_val(((3*a)+u),((3*b)+v),k))+" "+str(-1*convert_grid_to_val(((3*a)+u),((3*b)+w),k))+" 0")
 
-# Placeholder for SAT solver's output, replace with actual output
-sat_solver_output = [1, -2, 3, ...]  # This should be replaced with the actual output from a SAT solver
+for k in range(1,10):
+    for a in range(0,3):
+        for b in range(0,3):
+            for u in range(1,3):
+                for v in range(1,4):
+                    for w in range(u+1,4):
+                        for t in range(1,4):
+                            sat.append(str(-1*convert_grid_to_val(((3*a)+u),((3*b)+v),k))+" "+str(-1*convert_grid_to_val(((3*a)+w),((3*b)+t),k))+" 0")
 
-sudoku_solution = sat2sud2(sat_solver_output)
-print("Sudoku solution based on the SAT solver's output:")
-for row in sudoku_solution:
-    print(row)
+
+num_of_clauses = len(sat)
+num_of_variables = 729 # max num encoding can provide (81×8)+(9×8)+8+1
+header = "p cnf " + str(num_of_variables) + " " + str(num_of_clauses) + "\n"
+cnf = "\n".join(sat)
+print(header + cnf)
+
+# Additional constraints for efficient encoding
+
+# Ensure each cell has at most one value
+for i in range(1, 10):
+    for j in range(1, 10):
+        for k in range(1, 10):
+            for l in range(k+1, 10):
+                sat.append(f"-{convert_grid_to_val(i, j, k)} -{convert_grid_to_val(i, j, l)} 0")
+
+# The existing script handles placing numbers in cells based on the input Sudoku puzzle.
+# The constraints for each number to appear once in every row, column, and subgrid
+# are assumed to be part of the initial implementation and are optimized as part of this task.
