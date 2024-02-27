@@ -33,3 +33,18 @@ results outputted in results folder
 sh ET1_stats.sh
 
 results outputted in ./ET1_stats.txt
+
+
+### Code completed by
+#### Created by Gareth Marriott
+V00875748
+Basic Task and ET1 code to include:
+sudtosat.py
+sattosud.py
+
+and
+extract_stats.py
+run.sh
+run_puz.sh
+basic_task_stats.sh
+ET1_stats.sh
