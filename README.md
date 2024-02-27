@@ -9,12 +9,13 @@ name (v-num)
 ### Simple test
 sh run.sh
 
-results found in results folder
+results outputted in results folder
 
-### Test all puzzles
+
+### Test all basic task puzzles
 sh test_all.sh
 
-results found in results folder
+results outputted in results folder
 
 
 ### Test single puzzle
